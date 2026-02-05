@@ -5,10 +5,33 @@ const searchInput = document.getElementById("searchInput");
 const typeSelect = document.getElementById("typeSelect");
 const notFilter = document.getElementById("notFilter");
 const errorDiv = document.getElementById("error");
+const errorMsg = document.getElementById("error-msg");
+const retryBtn = document.getElementById("retry-btn");
 const loader = document.getElementById("loader");
 const noResults = document.getElementById("no-results");
 
 let allPokemon = [];
+
+// MAPEO DE TIPOS INGLÉS → ESPAÑOL (CLAVE PARA QUE SE VEAN)
+const TYPE_MAP = {
+  grass: "planta",
+  poison: "veneno",
+  fire: "fuego",
+  water: "agua",
+  electric: "electrico",
+  normal: "normal",
+  fighting: "lucha",
+  flying: "volador",
+  ground: "tierra",
+  rock: "roca",
+  bug: "bicho",
+  ghost: "fantasma",
+  steel: "acero",
+  ice: "hielo",
+  dragon: "dragon",
+  dark: "siniestro",
+  fairy: "hada"
+};
 
 async function loadPokemon() {
   try {
@@ -29,15 +52,22 @@ async function loadPokemon() {
     allPokemon = detailedData.map(p => ({
       id: p.id,
       name: p.name,
-      image: p.sprites.other["official-artwork"].front_default,
-      types: p.types.map(t => t.type.name)
+      image:
+        p.sprites?.other?.["official-artwork"]?.front_default ||
+        p.sprites?.front_default ||
+        "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png",
+
+      // 👉 AQUÍ ESTÁ LA CORRECCIÓN CLAVE
+      types: p.types && p.types.length > 0
+        ? p.types.map(t => TYPE_MAP[t.type.name] || "desconocido")
+        : ["desconocido"]
     }));
 
     loadTypeOptions();
     render(allPokemon);
 
   } catch (err) {
-    showError("No se pudo conectar con la PokéAPI. Intenta más tarde.");
+    showError("No se pudo conectar con la PokéAPI. Verifica tu internet o intenta más tarde.");
   } finally {
     loader.style.display = "none";
   }
@@ -72,7 +102,7 @@ function render(list) {
       <div class="types">
         ${p.types.map(t =>
           `<span class="type ${t}">${capitalize(t)}</span>`
-        ).join("")}
+        ).join(" ")}
       </div>
     `;
 
@@ -89,14 +119,12 @@ function applyFilters() {
   const isNot = notFilter.checked;
 
   const filtered = allPokemon.filter(p => {
-    // ---- FILTRO DE TEXTO ----
     const matchesText =
       p.name.includes(text) ||
       String(p.id).includes(text);
 
     const textCondition = isNot ? !matchesText : matchesText;
 
-    // ---- FILTRO DE TIPO ----
     const matchesType =
       selectedTypes.length === 0 ||
       selectedTypes.some(t => p.types.includes(t));
@@ -111,9 +139,14 @@ function applyFilters() {
 }
 
 function showError(msg) {
-  errorDiv.textContent = msg;
+  errorMsg.textContent = msg;
   errorDiv.classList.remove("hidden");
 }
+
+retryBtn.addEventListener("click", () => {
+  errorDiv.classList.add("hidden");
+  loadPokemon();
+});
 
 searchInput.addEventListener("input", applyFilters);
 typeSelect.addEventListener("change", applyFilters);

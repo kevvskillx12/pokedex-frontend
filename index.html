@@ -8,6 +8,8 @@
 <body>
 
 <header class="toolbar">
+  
+
   <div class="search-group">
     <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o #ID...">
   </div>
@@ -25,14 +27,31 @@
 </header>
 
 <main>
+
+  <!-- ====== NUEVA PRIMERA VISTA ====== -->
+  <section class="hero">
+    <div class="hero-content">
+      <img src="assets/images/logo.png" alt="Pokédex" class="hero-logo">
+      <h1>Pokédex Interactiva</h1>
+      <p>
+        Explora, busca y filtra Pokémon por nombre, número y tipo.  
+        Usa el modo <strong>NOT</strong> para realizar búsquedas de exclusión.
+      </p>
+    </div>
+  </section>
+
   <!-- Pantalla de carga -->
   <div id="loader" class="loader">
     <div class="spinner"></div>
     <p>Cargando Pokédex...</p>
   </div>
 
-  <!-- Mensaje de error -->
-  <div id="error" class="hidden"></div>
+  <!-- Mensaje de error personalizado -->
+  <div id="error" class="error hidden">
+    <h3>⚠️ Error de conexión</h3>
+    <p id="error-msg"></p>
+    <button id="retry-btn">Reintentar</button>
+  </div>
 
   <!-- Grid de tarjetas -->
   <section id="pokedex" class="pokedex-grid"></section>
